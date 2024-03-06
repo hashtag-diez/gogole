@@ -1,7 +1,6 @@
-import { DateTime } from 'luxon'
-import { column } from '@adonisjs/lucid/orm'
+import { BaseModel, column } from '@adonisjs/lucid/orm'
 
-export default class User {
+export default class Book extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
@@ -10,25 +9,13 @@ export default class User {
 
   @column()
   declare title: string
-  
-  @column()
-  declare contributors: string[]
-
-  @column()
-  declare editor: string
-
-  @column()
-  declare language: string
 
   @column()
   declare filepath: string
 
   @column()
-  declare imagelink: string
-  
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare subjects: string
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  @column()
+  declare imagepath: string
 }
