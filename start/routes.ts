@@ -13,6 +13,7 @@ import { tokenization, documentPreProcessing } from './indexation/indexation.js'
 
 import Book from '#models/book'
 import BookWord from '#models/book_word'
+import JaccardNode from '#models/jaccard_node'
 
 router.get('/', async () => {
   let cpt = await db.from("books").count("* as total")
@@ -61,34 +62,64 @@ router.get('/', async () => {
       i++
     }
   } else {
-    const req = await fetch("https://gutendex.com/books/?page=1")
-    const data = await req.json() as { results: any[] }
-    for (const entry of data.results) {
-      console.log("Tic")
-      if (entry["formats"]["text/plain; charset=us-ascii"] && entry["formats"]["image/jpeg"]) {
-        const request = await fetch(entry["formats"]["text/plain; charset=us-ascii"])
-        const content = await request.text()
-        const tokens_occ = tokenization(content)
-        for (const entry2 of data.results) {
-          console.log("Tac")
-          try{
-            if((entry2['id'] != entry["id"]) && (entry2["formats"]["text/plain; charset=us-ascii"] && entry2["formats"]["image/jpeg"])) {
-              const request = await fetch(entry2["formats"]["text/plain; charset=us-ascii"])
-              const content2 = await request.text()
-              const tokens_occ2 = tokenization(content2)
-              var identical = identicalWordsInSentence(tokens_occ, tokens_occ2);
-              var result = (identical.length / (content.length + content2.length - identical.length));
-              console.log(entry["id"] + ":" + entry2["id"] + " -> " + result)
-            }
-          } catch (e){
-            console.log(e)
-          }
-        }
+    let books = await Book.all();
+    for(let i=0; i<books.length; i++){
+      let book1 = books[i];
+      let keyword1 = await BookWord.query().where("book_id",book1.id)
+      const entries = []
+      for(let j=i; i<books.length; i++){
+        let book2 = books[j];
+        let keyword2 = await BookWord.query().where("book_id",book2.id)
+        let jaccard_grade = getJaccardGrade(transformBookWords(keyword1), transformBookWords(keyword2))
+        entries.push({
+          book_id_1: book1.id,
+          book_id_2: book2.id,
+          grade: jaccard_grade
+        })
+      }
+      let start = 0
+      let end = 250
+      while (start != entries.length) {
+        await JaccardNode.createMany(entries.slice(start, end))
+        start = end
+        end = Math.min(end + 250, entries.length)
       }
     }
   }
   return "good"
 })
+
+var transformBookWords = (book_words: BookWord[]) => {
+  let transformed_book_words: Map<string,number> = new Map()
+  book_words.forEach((book_word) => {
+    transformed_book_words.set(book_word.word,book_word.occurrence)
+  })
+  return transformed_book_words
+}
+
+var getJaccardGrade = (map1: Map<string,number>, map2: Map<string,number>) => {
+  let union_count = 0;
+  let intersection_count = 0;
+  let common_words: Map<string,boolean> = new Map()
+  for(const key of map1.keys()){
+    if(map2.get(key)!=undefined){
+      intersection_count+=Math.min(map1.get(key) as number,map2.get(key) as number)
+      union_count+=Math.max(map1.get(key) as number,map2.get(key) as number)
+      common_words.set(key,true)
+    }else{
+      union_count+=map1.get(key) as number
+    }
+  }
+
+  for(const key of map2.keys()){
+    if(common_words.get(key))
+      continue
+    else
+      union_count+=map2.get(key) as number
+  }
+
+  return 1 - intersection_count/union_count
+}
 
 var exists = function(word: string, array: string[]) {
 	for(var i = 0; i < array.length; i++) {
