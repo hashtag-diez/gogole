@@ -1,6 +1,7 @@
 import Book from '#models/book'
 import JaccardNode from '#models/jaccard_node'
 import { BaseCommand } from '@adonisjs/core/ace'
+import db from '@adonisjs/lucid/services/db'
 import cytoscape from 'cytoscape'
 
 export default class CompleteBooks extends BaseCommand {
@@ -10,9 +11,13 @@ export default class CompleteBooks extends BaseCommand {
   books: Book[] = []
   nodes: JaccardNode[] = []
 
+  public static options = {
+    startApp: true,
+  };
+
   async prepare(..._: any[]) {
     this.books = await Book.all()
-    this.nodes = await JaccardNode.all()
+    this.nodes = await db.from("jaccard_nodes")
   }
   async run() {
     if (this.books.length == 0) this.logger.error("Books table not instanciated")

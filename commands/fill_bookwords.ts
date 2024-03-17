@@ -8,6 +8,10 @@ export default class FillBookwords extends BaseCommand {
   static commandName = 'fill:bookwords'
   static description = 'The second command to run, associate every word from a book with its occurrence. Need to be re-run after filling the words table (A bit long)'
 
+  public static options = {
+    startApp: true,
+  };
+  
   books: Book[] = []
   words: Record<string, number> = {}
 

@@ -1,11 +1,15 @@
 import { BaseCommand } from '@adonisjs/core/ace'
-import Book from '#models/book'
+import Book from "#models/book"
 
 export default class FillBooks extends BaseCommand {
-  static commandName = 'fill:books'
-  static description = 'First request to run, fetch >1664 books from Gutenberg and put them in books table'
+  public static commandName = 'fill:books'
+  public static description = 'First request to run, fetch >1664 books from Gutenberg and put them in books table'
 
   instanciated = false
+
+  public static options = {
+    startApp: true,
+  };
 
   async prepare() {
     let cpt = await Book.all()

@@ -9,6 +9,10 @@ export default class FillJaccardNodes extends BaseCommand {
   books: Book[] = []
   instanciated = false
 
+  public static options = {
+    startApp: true,
+  };
+  
   async prepare() {
     this.books = await Book.all()
     const cpt = await db.from("jaccard_nodes").limit(1)

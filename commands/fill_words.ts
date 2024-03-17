@@ -7,6 +7,10 @@ export default class FillWords extends BaseCommand {
 
   instanciated = false
 
+  public static options = {
+    startApp: true,
+  };
+  
   async prepare() {
     let cpt = await db.from("words").limit(1)
     this.instanciated = cpt.length != 0 
