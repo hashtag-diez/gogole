@@ -18,4 +18,13 @@ export default class Book extends BaseModel {
 
   @column()
   declare imagepath: string
+
+  @column()
+  declare dbId: number
+
+  @column()
+  declare bc: number
+
+  @column()
+  declare suggestions: JSON
 }

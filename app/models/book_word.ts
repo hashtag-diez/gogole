@@ -8,5 +8,8 @@ export default class BookWord extends BaseModel {
   declare word: string
 
   @column()
+  declare word_id: number
+
+  @column()
   declare occurrence: number
 }
