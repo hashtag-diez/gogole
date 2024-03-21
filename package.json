@@ -59,6 +59,10 @@
     "@adonisjs/cors": "^2.2.1",
     "@adonisjs/lucid": "^20.1.0",
     "@adonisjs/session": "^7.1.1",
+    "@mikro-orm/cli": "^6.1.11",
+    "@mikro-orm/core": "^6.1.11",
+    "@mikro-orm/reflection": "^6.1.11",
+    "@mikro-orm/sqlite": "^6.1.11",
     "@vinejs/vine": "^1.7.1",
     "better-sqlite3": "^9.4.3",
     "cytoscape": "^3.28.1",
@@ -66,6 +70,9 @@
     "luxon": "^3.4.4",
     "reflect-metadata": "^0.2.1",
     "stopword": "^3.0.1"
+  },
+  "mikro-orm": {
+    "useTsNode": true
   },
   "eslintConfig": {
     "extends": "@adonisjs/eslint-config/app"

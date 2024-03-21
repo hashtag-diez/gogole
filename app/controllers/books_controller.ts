@@ -1,0 +1,26 @@
+// import type { HttpContext } from '@adonisjs/core/http'
+
+import Books from "#models/books.entity";
+import { HttpContext } from "@adonisjs/core/http";
+import { db } from "#services/db"
+
+export default class BooksController {
+  async index({ request }: HttpContext) {
+    const index = request.input("page", 1)
+    const books = await db.em.findAndCount(Books, {}, { limit: 10, offset: (index - 1)*50 });
+    return books
+  }
+
+  async search({ request }: HttpContext) {
+    const reg: string = request.input("query", "")
+    const qb = db.em.getConnection()
+    const res = await qb.execute(`
+        SELECT b.*
+        FROM books b
+        JOIN book_words bw ON b.id = bw.book_id
+        WHERE bw.word regexp '${reg.toLowerCase()}'
+        ORDER BY b.bc DESC;
+    `)
+    return res
+  }
+}
