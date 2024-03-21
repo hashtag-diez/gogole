@@ -1,12 +1,15 @@
-import Book from '#models/book'
+import Books from '#models/books.entity'
+import JaccardNodes from '#models/jaccard_nodes.entity'
 import { BaseCommand } from '@adonisjs/core/ace'
-import db from '@adonisjs/lucid/services/db'
+import { db } from "#services/db"
+
+
 
 export default class FillJaccardNodes extends BaseCommand {
   static commandName = 'fill:jaccard-nodes'
   static description = 'The fourth command to run, calculate and assign the jaccard index for every pair of books. (Beware its quite long)'
 
-  books: Book[] = []
+  books: Books[] = []
   instanciated = false
 
   public static options = {
@@ -14,18 +17,19 @@ export default class FillJaccardNodes extends BaseCommand {
   };
   
   async prepare() {
-    this.books = await Book.all()
-    const cpt = await db.from("jaccard_nodes").limit(1)
+    this.books = await db.em.findAll(Books)
+    const cpt = await db.em.find(JaccardNodes, {}, {limit: 1})
     this.instanciated = cpt.length != 0
   }
 
   async run() {
     if (this.instanciated) this.logger.info("JaccardNodes table already instanciated")
     else {
+      const qb = db.em.getConnection()
       for (let i = 0; i < this.books.length; i++) {
         const book = this.books[i]
         console.log(`${i}/${this.books.length}`)
-        await db.rawQuery(` 
+        await qb.execute(` 
         INSERT INTO jaccard_nodes (book_id_1, book_id_2, grade)
         SELECT
             BK1.book_id AS book1_id,

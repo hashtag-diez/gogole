@@ -1,17 +1,21 @@
 import { Entity, Property, PrimaryKey, ManyToOne } from '@mikro-orm/core';
 import Books from './books.entity.js';
+import Words from './words.entity.js';
 
 @Entity()
-export default class JaccardNodes {
+export default class BookWords  {
   @PrimaryKey()
   id!: number;
 
   @ManyToOne()
-  book1!: Books
-
-  @ManyToOne()
-  book2!: Books
+  book!: Books
 
   @Property()
-  grade!: number
+  word!: string
+
+  @ManyToOne()
+  words!: Words
+
+  @Property()
+  occurrence!: number
 }

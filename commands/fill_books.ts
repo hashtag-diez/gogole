@@ -1,5 +1,6 @@
 import { BaseCommand } from '@adonisjs/core/ace'
-import Book from "#models/book"
+import Books from "#models/books.entity"
+import { db } from "#services/db"
 
 export default class FillBooks extends BaseCommand {
   public static commandName = 'fill:books'
@@ -12,13 +13,13 @@ export default class FillBooks extends BaseCommand {
   };
 
   async prepare() {
-    let cpt = await Book.all()
-    this.instanciated = cpt.length != 0 
+    let cpt = await db.em.findAll(Books)
+    this.instanciated = cpt.length != 0
   }
 
   async run() {
-    if(this.instanciated) this.logger.info("Books table already instanciated")
-    else{
+    if (this.instanciated) this.logger.info("Books table already instanciated")
+    else {
       let tot = 0
       let i = 1
       while (tot < 1664) {
@@ -28,15 +29,14 @@ export default class FillBooks extends BaseCommand {
         for (const entry of data.results) {
           if (entry["formats"]["text/plain; charset=us-ascii"] && entry["formats"]["image/jpeg"]) {
             try {
-              await Book.create({
-                id: entry["id"],
-                title: entry["title"],
-                subjects: JSON.stringify(entry["subjects"]),
-                filepath: entry["formats"]["text/plain; charset=us-ascii"],
-                imagepath: entry["formats"]["image/jpeg"],
-                author: JSON.stringify(entry["authors"])
-              })
-              
+              const book = new Books()
+              book.id = entry["id"]
+              book.title = entry["title"]
+              book.subjects = JSON.stringify(entry["subjects"])
+              book.filepath = entry["formats"]["text/plain; charset=us-ascii"]
+              book.imagepath = entry["formats"]["image/jpeg"]
+              book.author = JSON.stringify(entry["authors"])
+              db.em.persist(book)
             } catch (error) {
               this.logger.error(error)
             }
@@ -45,6 +45,7 @@ export default class FillBooks extends BaseCommand {
         tot++
         i++
       }
-    }   
+    }
+    await db.em.flush()
   }
 }

@@ -1,7 +1,7 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 
 @Entity()
-export default class Word {
+export default class Words {
   @PrimaryKey()
   declare id: number
 

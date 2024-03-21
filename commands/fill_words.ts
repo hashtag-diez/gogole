@@ -1,5 +1,7 @@
 import { BaseCommand } from '@adonisjs/core/ace'
-import db from '@adonisjs/lucid/services/db'
+import { db } from "#services/db"
+import Words from '#models/words.entity'
+
 
 export default class FillWords extends BaseCommand {
   static commandName = 'fill:words'
@@ -12,13 +14,14 @@ export default class FillWords extends BaseCommand {
   };
   
   async prepare() {
-    let cpt = await db.from("words").limit(1)
+    let cpt = await db.em.find(Words, {}, {limit: 1})
     this.instanciated = cpt.length != 0 
   }
 
   async run() {
     if(this.instanciated) this.logger.info("Words table already filled")
-    await db.rawQuery(`
+    const qb = db.em.getConnection()
+    await qb.execute(`
       INSERT INTO Word (word)
       SELECT DISTINCT word
       FROM BookWord;    

@@ -1,6 +1,9 @@
 {
   "extends": "@adonisjs/tsconfig/tsconfig.app.json",
   "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
     "rootDir": "./",
     "outDir": "./build",
     "paths": {
@@ -22,4 +25,8 @@
       "#config/*": ["./config/*.js"],
     },
   },
+  "ts-node": {
+    // Tell ts-node CLI to install the --loader automatically
+    "esm": true
+  }
 }

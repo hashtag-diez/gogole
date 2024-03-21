@@ -57,10 +57,10 @@
     "@adonisjs/auth": "^9.1.1",
     "@adonisjs/core": "^6.2.2",
     "@adonisjs/cors": "^2.2.1",
-    "@adonisjs/lucid": "^20.1.0",
     "@adonisjs/session": "^7.1.1",
     "@mikro-orm/cli": "^6.1.11",
     "@mikro-orm/core": "^6.1.11",
+    "@mikro-orm/migrations": "^6.1.11",
     "@mikro-orm/reflection": "^6.1.11",
     "@mikro-orm/sqlite": "^6.1.11",
     "@vinejs/vine": "^1.7.1",
@@ -72,7 +72,12 @@
     "stopword": "^3.0.1"
   },
   "mikro-orm": {
-    "useTsNode": true
+    "useTsNode": true,
+    "alwaysAllowTs": true,
+    "configPaths": [
+      "./mikro-orm.config.ts",
+      "./dist/mikro-orm.config.js"
+    ]
   },
   "eslintConfig": {
     "extends": "@adonisjs/eslint-config/app"

@@ -1,6 +1,7 @@
-import Book from '#models/book'
-import BookWord from '#models/book_word'
-import Word from '#models/word'
+import Books from '#models/books.entity'
+import BookWord from '#models/book_words.entity'
+import Words from '#models/words.entity'
+import { db } from "#services/db"
 import { BaseCommand } from '@adonisjs/core/ace'
 import { documentPreProcessing } from '../start/indexation/indexation.js'
 
@@ -12,12 +13,12 @@ export default class FillBookwords extends BaseCommand {
     startApp: true,
   };
   
-  books: Book[] = []
+  books: Books[] = []
   words: Record<string, number> = {}
 
   async prepare() {
-    this.books = await Book.all()
-    const words = await Word.all()
+    this.books = await db.em.findAll(Books)
+    const words = await db.em.findAll(Words)
     words.forEach(x => this.words[x.word] = x.id)
   }
 
@@ -31,17 +32,16 @@ export default class FillBookwords extends BaseCommand {
         const tokens_occ = documentPreProcessing(content)
         const entries = []
         for (const token of Object.keys(tokens_occ)) {
-          entries.push({
-            book_id: book["id"],
-            word: token,
-            occurrence: tokens_occ[token],
-            word_id: this.words[token] ?? -1
-          })
+          const bw = new BookWord()
+          bw.book = book
+          bw.word = token
+          bw.occurrence = tokens_occ[token]
+          entries.push(bw)
         }
         let start = 0
         let end = 500
         while (start != entries.length) {
-          await BookWord.createMany(entries.slice(start, end))
+          db.em.persistAndFlush(entries.slice(start, end))
           start = end
           end = Math.min(end + 500, entries.length)
         }

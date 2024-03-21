@@ -3,6 +3,8 @@
 import Books from "#models/books.entity";
 import { HttpContext } from "@adonisjs/core/http";
 import { db } from "#services/db"
+import BookWord from "#models/book_words.entity";
+import { QueryOrder } from "@mikro-orm/sqlite";
 
 export default class BooksController {
   async index({ request }: HttpContext) {
@@ -19,8 +21,17 @@ export default class BooksController {
         FROM books b
         JOIN book_words bw ON b.id = bw.book_id
         WHERE bw.word regexp '${reg.toLowerCase()}'
-        ORDER BY b.bc DESC;
-    `)
+        ORDER BY b.bc DESC
+        LIMIT 10;
+    `) 
+/*     const qb = db.em.createQueryBuilder(BookWord, "bw")
+    const res = qb
+    .select(["b.*"])
+    .join("bw.book_id", "b")
+    .where('b.id = bw.book_id')
+    .andWhere({'bw.word': {$re: reg.toLowerCase()}})
+    .orderBy({ books: { bc: QueryOrder.DESC } }) */
+    
     return res
   }
 }
