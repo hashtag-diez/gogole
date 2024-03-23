@@ -3,6 +3,7 @@ node_modules
 build
 tmp
 temp
+app/services/sqlean-macos-arm64
 
 # Secrets
 .env
