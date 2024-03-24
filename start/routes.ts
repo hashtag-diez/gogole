@@ -14,3 +14,4 @@ import router from '@adonisjs/core/services/router'
 router.get('books', [BooksController, 'index'])
 router.get('search', [BooksController, 'search'])
 router.get('completion', [BooksController, 'completion'])
+router.get('recommendation', [BooksController, 'recommendation'])

@@ -56,4 +56,19 @@ export default class BooksController {
     `)
     return res
   }
+
+  async recommendation({ request }: HttpContext) {
+    const bookId = request.input('book_id')
+    const limit = request.input('limit', 10)
+    if (!bookId) return []
+
+    const qb = db.em.getConnection()
+    // const res = await qb.execute(`
+    //     SELECT book_id_2, grade
+    //     FROM jaccard_nodes
+    //     WHERE book_id_1 = ${bookId}
+    //     ORDER BY grade DESC;
+    // `)
+    return res
+  }
 }
