@@ -3,6 +3,7 @@ import JaccardNodes from '#models/jaccard_nodes.entity'
 import { BaseCommand } from '@adonisjs/core/ace'
 import { db } from "#services/db"
 import cytoscape from 'cytoscape'
+import Suggestions from '#models/suggestions.entity'
 
 export default class CompleteBooks extends BaseCommand {
   static commandName = 'complete:books'
@@ -28,24 +29,23 @@ export default class CompleteBooks extends BaseCommand {
 
       const graph = cytoscape({})
       this.books.forEach(book => {
-        if (book.id == 72979) console.log(book.id)
         graph.add({ data: { id: book.id.toString() } })
       })
-
 
       for (const node of this.nodes) {
         if (node.grade <= average) {
           try {
             graph.add({
-              data: { id: `${node.book1.id}${node.book2.id}`, source: node.book1.id.toString(), target: node.book2.id.toString() }
+              data: { id: `${node.book_id_1}${node.book_id_2}`, source: node.book_id_1.toString(), target: node.book_id_2.toString() }
             })
           } catch (e) {
-            this.logger.error(e)
+
           }
         }
       }
-
+      this.logger.info("Graph completed")
       const bg = graph.$("").betweennessCentrality({})
+      this.logger.info("Betweeness Centrality computed")
 
       for (const book of this.books) {
         const id = book.id.toString()
@@ -54,6 +54,17 @@ export default class CompleteBooks extends BaseCommand {
         book.bc = bc
       }
       await db.em.flush()
+
+      for (const book of this.books) {
+        const node = graph.$id(book.id.toString())
+        const similar = node.neighborhood().nodes().sort((node1, node2) => bg.betweenness(node2) - bg.betweenness(node1)).map(node => parseInt(node.id())).slice(0, 10)
+        console.log(`${book.id} : ` + similar.toString())
+        const similar_books = this.books.filter(book => book.id in similar)
+        const suggestions = new Suggestions()
+        suggestions.book = book
+        suggestions.similar.set(similar_books)
+        await db.em.persistAndFlush(suggestions)
+      }
     }
   }
 

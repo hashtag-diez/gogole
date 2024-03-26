@@ -36,16 +36,17 @@ export default class FillBooks extends BaseCommand {
               book.filepath = entry["formats"]["text/plain; charset=us-ascii"]
               book.imagepath = entry["formats"]["image/jpeg"]
               book.author = JSON.stringify(entry["authors"])
+              book.bc = 0
               db.em.persist(book)
+              tot++
             } catch (error) {
               this.logger.error(error)
             }
           }
         }
-        tot++
         i++
+        await db.em.flush()
       }
     }
-    await db.em.flush()
   }
 }

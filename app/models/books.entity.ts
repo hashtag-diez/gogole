@@ -1,7 +1,7 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 
 @Entity()
-export default class Books  {
+export default class Books {
   @PrimaryKey()
   id!: number
 
@@ -21,11 +21,5 @@ export default class Books  {
   imagepath!: string
 
   @Property()
-  dbId!: number
-
-  @Property()
   bc!: number
-
-  @Property()
-  suggestions!: JSON
 }

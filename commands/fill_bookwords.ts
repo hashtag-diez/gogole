@@ -2,7 +2,7 @@ import Books from '#models/books.entity'
 import BookWord from '#models/book_words.entity'
 import Words from '#models/words.entity'
 import { db } from "#services/db"
-import { BaseCommand } from '@adonisjs/core/ace'
+import { BaseCommand, args } from '@adonisjs/core/ace'
 import { documentPreProcessing } from '../start/indexation/indexation.js'
 
 export default class FillBookwords extends BaseCommand {
@@ -16,6 +16,9 @@ export default class FillBookwords extends BaseCommand {
   books: Books[] = []
   words: Record<string, number> = {}
 
+  @args.string()
+  declare start: string
+  
   async prepare() {
     this.books = await db.em.findAll(Books)
     const words = await db.em.findAll(Words)
@@ -23,11 +26,20 @@ export default class FillBookwords extends BaseCommand {
   }
 
   async run() {
-    let i = 1;
-    for (const book of this.books) {
+    let start = parseInt(this.start)
+    let i = start+1;
+    for (let j = start; i<start+130; j++) {
+      const book = this.books[j]
       console.log(`${i}/${this.books.length}`)
       try {
-        const request = await fetch(book.filepath)
+        let request = null
+        while(request==null){
+          try {
+            request = await fetch(book.filepath)
+          } catch (error) {
+
+          }
+        }
         const content = await request.text()
         const tokens_occ = documentPreProcessing(content)
         const entries = []

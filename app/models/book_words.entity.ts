@@ -1,4 +1,5 @@
 import { Entity, Property, PrimaryKey, ManyToOne } from '@mikro-orm/core';
+import type { Ref } from '@mikro-orm/core';
 import Books from './books.entity.js';
 import Words from './words.entity.js';
 
@@ -13,8 +14,8 @@ export default class BookWords  {
   @Property()
   word!: string
 
-  @ManyToOne()
-  words!: Words
+  @ManyToOne(() => Words, {nullable: true})
+  words?: Ref<Words>
 
   @Property()
   occurrence!: number

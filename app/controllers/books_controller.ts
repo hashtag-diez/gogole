@@ -5,13 +5,19 @@ import { HttpContext } from '@adonisjs/core/http'
 import { db } from '#services/db'
 import BookWord from '#models/book_words.entity'
 import { QueryOrder } from '@mikro-orm/sqlite'
+import Suggestions from '#models/suggestions.entity'
 
 export default class BooksController {
 
   async index({ request }: HttpContext) {
     const index = request.input('page', 1)
-    const books = await db.em.findAndCount(Books, {}, { limit: 10, offset: (index - 1) * 50 })
-    return books
+    const qb = db.em.createQueryBuilder(Suggestions, 'sugg');
+    return qb
+      .select("*")
+      .leftJoinAndSelect('sugg.book', 'b')
+      .leftJoinAndSelect('sugg.similar', 'sim')
+      .limit(10, (index - 1) * 50)
+      .getResultList()
   }
 
   async search({ request }: HttpContext) {
@@ -59,16 +65,16 @@ export default class BooksController {
 
   async recommendation({ request }: HttpContext) {
     const bookId = request.input('book_id')
-    const limit = request.input('limit', 10)
+    // const limit = request.input('limit', 10)
     if (!bookId) return []
 
     const qb = db.em.getConnection()
-    // const res = await qb.execute(`
-    //     SELECT book_id_2, grade
-    //     FROM jaccard_nodes
-    //     WHERE book_id_1 = ${bookId}
-    //     ORDER BY grade DESC;
-    // `)
+    const res = await qb.execute(`
+         SELECT book_id_2, grade
+         FROM jaccard_nodes
+         WHERE book_id_1 = ${bookId}
+        ORDER BY grade DESC;
+     `)
     return res
   }
 }

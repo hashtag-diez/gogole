@@ -6,11 +6,11 @@ export default class JaccardNodes {
   @PrimaryKey()
   id!: number;
 
-  @ManyToOne()
-  book1!: Books
+  @Property()
+  book_id_1!: number
 
-  @ManyToOne()
-  book2!: Books
+  @Property()
+  book_id_2!: number
 
   @Property()
   grade!: number
