@@ -9,8 +9,8 @@ export default class BooksController {
   async index({ request }: HttpContext) {
     const index = request.input('page', 1)
     return db.em.find(Books, {}, {
-      limit: 10,
-      offset: (index - 1) * 50
+      limit: 16,
+      offset: (index - 1) * 16 + 1
     })
   }
 

@@ -2,7 +2,6 @@
 
 import { HttpContext } from '@adonisjs/core/http'
 import { db } from '#services/db'
-import { QueryOrder } from '@mikro-orm/sqlite'
 import Suggestions from '#models/suggestions.entity'
 
 export default class SuggestionsController {
@@ -12,11 +11,8 @@ export default class SuggestionsController {
     const qb = db.em.createQueryBuilder(Suggestions, 'sugg');
     return qb
       .select("sugg.*")
-      .leftJoinAndSelect('sugg.book', 'b')
-      .where({"b.id": id})
       .leftJoinAndSelect('sugg.similar', 'sim')
-      .orderBy({ book: { bc: QueryOrder.DESC } })
-      .limit(4)
+      .where({book : {id: id}})
       .getResultList()
   }
 }

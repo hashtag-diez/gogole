@@ -25,7 +25,7 @@ export default class CompleteBooks extends BaseCommand {
     else {
       /* const qb = db.em.createQueryBuilder(JaccardNodes) */
       /* const [avg] = await JaccardNode.query().avg("grade") */
-      const average = 0.75
+      /* const average = 0.75
 
       const graph = cytoscape({})
       this.books.forEach(book => {
@@ -42,30 +42,45 @@ export default class CompleteBooks extends BaseCommand {
 
           }
         }
-      }
+      } */
       this.logger.info("Graph completed")
-      const bg = graph.$("").betweennessCentrality({})
+      // const bg = graph.$("").betweennessCentrality({})
       this.logger.info("Betweeness Centrality computed")
 
-      for (const book of this.books) {
-        const id = book.id.toString()
-        const node = graph.$id(id)
-        const bc = bg.betweenness(node)
-        book.bc = bc
-      }
+      /*       for (const book of this.books) {
+              const id = book.id.toString()
+              const node = graph.$id(id)
+              const bc = bg.betweenness(node)
+              book.bc = bc
+            } */
+      
       await db.em.flush()
-
+      let i = 1
       for (const book of this.books) {
-        const node = graph.$id(book.id.toString())
-        const similar = node.neighborhood().nodes().sort((node1, node2) => bg.betweenness(node2) - bg.betweenness(node1)).map(node => parseInt(node.id())).slice(0, 10)
-        console.log(`${book.id} : ` + similar.toString())
-        const similar_books = this.books.filter(book => book.id in similar)
+        i++
+        console.log(`${i}/1708`)
+        // const similar = node.neighborhood().nodes().map(node => parseInt(node.id()))
+        const similar =
+          this.nodes.filter(node => node.book_id_1 == book.id || node.book_id_2 == book.id)
+            .sort((node1, node2) => node1.grade - node2.grade)
+            .slice(0, 10)
+            .map(node => db.em.getReference(Books,(node.book_id_1 == book.id ? node.book_id_2 : node.book_id_1)))
+        shuffleArray(similar)
         const suggestions = new Suggestions()
         suggestions.book = book
-        suggestions.similar.set(similar_books)
-        await db.em.persistAndFlush(suggestions)
+        suggestions.similar.add(similar)
+        db.em.persist(suggestions)
       }
+      await db.em.flush()
     }
   }
+}
 
+function shuffleArray(array: any[]) {
+  for (var i = array.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
 }
